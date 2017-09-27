@@ -12,6 +12,7 @@ The following function, `TestFDRThresholding`, simulates this scenario, where th
 The manual way
 --------------
 ```{r cache=FALSE, warnings=FALSE}
+library(ggplot2)
 set.seed(1)
 TestFDRThresholding <- function(number.of.signals, number.of.noises, fdr.threshold) {
     # simulate a single t-test between two groups of case subjects and control subjects
@@ -42,6 +43,14 @@ TestFDRThresholding <- function(number.of.signals, number.of.noises, fdr.thresho
     print(paste("# significant results:", number.of.significant.results))
     print(paste("# true positives:", number.of.true.positives, "out of", number.of.signals))
     print(paste("# false positives:", number.of.significant.results-number.of.true.positives))
+    
+    # show histogram
+    dat = data.frame(p = c(p.true, p.noise),
+        source = rep(c('signal','noise'), c(length(p.true), length(p.noise))))
+    ggplot(dat, aes(x=p, fill=source)) +
+        geom_histogram(alpha = 0.2, bins=100) +
+        scale_fill_manual(name="source",values=c("red","blue"),labels=c("noise","signal")) +
+        geom_vline(xintercept=p.threshold)
 }
 ```
 

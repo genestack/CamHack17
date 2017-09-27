@@ -5,13 +5,13 @@ Automatic P-value thresholding
 Imagine a scenario of finding differentially expressed genes between two groups 100 individuals. For each gene, we do a t-test to see if the expression distribution in one group differs from the second:
 - Some tests correspond to no differences (noises)
 - Some tests correspond to true differences (signals)
-
 The following function, `TestFDRThresholding`, simulates this scenario, where the number of signals and noises are specified by the parameters `number.of.signals` and `number.of.noises`. It then adjusts the P-values into False Discovery Rate (FDR) using the Benjamini-Hochberg method. The parameter `fdr.threshold` will be used to define the significant results and the function will report how many of those are true positives and how many are false positives.
 
 The manual way
 --------------
 
 ``` r
+library(ggplot2)
 set.seed(1)
 TestFDRThresholding <- function(number.of.signals, number.of.noises, fdr.threshold) {
     # simulate a single t-test between two groups of case subjects and control subjects
@@ -42,6 +42,14 @@ TestFDRThresholding <- function(number.of.signals, number.of.noises, fdr.thresho
     print(paste("# significant results:", number.of.significant.results))
     print(paste("# true positives:", number.of.true.positives, "out of", number.of.signals))
     print(paste("# false positives:", number.of.significant.results-number.of.true.positives))
+    
+    # show histogram
+    dat = data.frame(p = c(p.true, p.noise),
+        source = rep(c('signal','noise'), c(length(p.true), length(p.noise))))
+    ggplot(dat, aes(x=p, fill=source)) +
+        geom_histogram(alpha = 0.2, bins=100) +
+        scale_fill_manual(name="source",values=c("red","blue"),labels=c("noise","signal")) +
+        geom_vline(xintercept=p.threshold)
 }
 ```
 
@@ -58,6 +66,8 @@ TestFDRThresholding(number.of.signals=100, number.of.noises=10000, fdr.threshold
     ## [1] "# true positives: 100 out of 100"
     ## [1] "# false positives: 13"
 
+![](autoPValThresholding_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-2-1.png)
+
 If we lower the threshold down to `fdr.threshold = 0.01`, we still cover all the true positives **but no false positives**.
 
 ``` r
@@ -70,6 +80,8 @@ TestFDRThresholding(number.of.signals=100, number.of.noises=10000, fdr.threshold
     ## [1] "# significant results: 100"
     ## [1] "# true positives: 100 out of 100"
     ## [1] "# false positives: 0"
+
+![](autoPValThresholding_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-3-1.png)
 
 But what if we go stricter by setting `fdr.threshold = 0.01`? This time, we miss 1 true positive.
 
@@ -84,6 +96,8 @@ TestFDRThresholding(number.of.signals=100, number.of.noises=10000, fdr.threshold
     ## [1] "# true positives: 99 out of 100"
     ## [1] "# false positives: 0"
 
+![](autoPValThresholding_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-4-1.png)
+
 The problem gets worse as you are dealing with more tests. If we have 10000 signals instead of noise, setting `fdr.threshold = 0.1` **would bring in 521, instead of 10 false positives**.
 
 ``` r
@@ -97,9 +111,11 @@ TestFDRThresholding(number.of.signals=10000, number.of.noises=10000, fdr.thresho
     ## [1] "# true positives: 10000 out of 10000"
     ## [1] "# false positives: 493"
 
+![](autoPValThresholding_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-5-1.png)
+
 The automatic way
 -----------------
 
-TODO: Optimal threshold ==
+TODO: optimal threshold ==
 - Maximimises the number of true positives whilst minimising the number of false positives
-- The point where the uniform distribution (corresponding to the P-values of the noises) becomes a spike (corresponding to a mixture of the P-values of the signals and the noises)
+- the point where the uniform distribution (corresponding to the P-values of the noises) becomes a spike (corresponding to a mixture of the P-values of the signals and the noises)
