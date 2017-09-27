@@ -3,7 +3,7 @@ scRNASeqPredict Guide
 Kevin Dialdestoro
 2017-09-27
 
-Use several annotated gold standard scRNA-Seq datasets for training and testing the prediction model, as already collected by Lin et al. [Using Neural Networks To Improve Single-Cell RNA-Seq Data Analysis](https://www.biorxiv.org/content/early/2017/04/23/129759). Datasets are collected from [here](http://sb.cs.cmu.edu/scnn/).
+Use several public annotated gold-standard scRNA-Seq datasets for training and testing the prediction model, as already collected by Lin et al. [Using Neural Networks To Improve Single-Cell RNA-Seq Data Analysis](https://www.biorxiv.org/content/early/2017/04/23/129759). Datasets are collected from [here](http://sb.cs.cmu.edu/scnn/).
 
 Read training datasets and their metadata
 -----------------------------------------
