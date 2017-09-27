@@ -5,6 +5,7 @@ Automatic P-value thresholding
 Imagine a scenario of finding differentially expressed genes between two groups 100 individuals. For each gene, we do a t-test to see if the expression distribution in one group differs from the second:
 - Some tests correspond to no differences (noises)
 - Some tests correspond to true differences (signals)
+
 The following function, `TestFDRThresholding`, simulates this scenario, where the number of signals and noises are specified by the parameters `number.of.signals` and `number.of.noises`. It then adjusts the P-values into False Discovery Rate (FDR) using the Benjamini-Hochberg method. The parameter `fdr.threshold` will be used to define the significant results and the function will report how many of those are true positives and how many are false positives.
 
 The manual way
