@@ -1,0 +1,8 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+**.RData
+**.rdx
+**.rdb
+**__packages

@@ -1,0 +1,106 @@
+---
+title: "scRNASeqPredict Guide"
+author: "Kevin Dialdestoro"
+date: "`r Sys.Date()`"
+output: rmarkdown::github_document
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+Use several annotated gold standard scRNA-Seq datasets for training and testing the prediction model, as already collected by Lin et al. [Using Neural Networks To Improve Single-Cell RNA-Seq Data Analysis](https://www.biorxiv.org/content/early/2017/04/23/129759). Datasets are collected from [here](http://sb.cs.cmu.edu/scnn/).
+
+```{r echo=FALSE, message=FALSE, warnings=FALSE}
+library(flashpcaR)
+```
+
+```{r echo=FALSE, message=FALSE, warnings=FALSE}
+ReadDatasets = function(...) {
+    datasets.paths = c(...)
+    expr.list = lapply(datasets.paths, read.table, sep="\t", header=TRUE, check.names=FALSE, row.names = NULL, stringsAsFactors = FALSE)
+
+    # merge tables into one by common genes
+    # transpose s.t. the samples correspond to rows
+    expr = Reduce(function(...) merge(..., by='gene'), expr.list)
+    rownames(expr) = expr[,'gene']
+    expr = expr[,-1]
+    expr = data.matrix(expr)
+    return(expr)
+}
+
+ReadMetadata = function(metadata.path) {
+    metadata = read.table(metadata.path, sep="\t", header=TRUE, check.names=FALSE, row.names = 1, stringsAsFactors = FALSE)
+    return(metadata)
+}
+
+BuildPCAModel = function(expr) {
+    # remove genes with all zeroes
+    expr = expr[rowSums(expr) != 0, ]
+
+    number.components = min(100, ncol(expr))
+    pca.model = flashpca(expr, ndim=number.components, stand="sd")
+
+    # PCA weights
+    pcaWeights = pca.model$vectors
+    rownames(pcaWeights) = rownames(expr)
+    colnames(pcaWeights) = paste0("PC",1:number.components)
+
+    # PCA values
+    pcaValues = t(expr) %*% pca.model$vectors
+    rownames(pcaValues) = colnames(expr)
+    colnames(pcaValues) = paste0("PC",1:number.components)
+    rownames(pcaValues) = paste0(rownames(pcaValues))
+
+    return(list(weights = pcaWeights, values = pcaValues))
+}
+
+PredictCellTypes = function(query.expr, pca.model, metadata) {
+    common.genes = row.names(pca.model$weights)
+    query.expr = query.expr[common.genes, ]
+
+    predictions = sapply(1:ncol(query.expr), function(i) {
+        query.expr.single = query.expr[, i]
+        testCellPCA = t(query.expr.single) %*% pca.model$weights
+        distances = apply(pca.model$values, 1, function(x){dist(rbind(x,testCellPCA))})
+        distances = sort(distances)
+        closestCells = names(head(distances,10))
+        closestCells = metadata[closestCells, ]
+        return(names(sort(table(closestCells),decreasing=TRUE)[1]))
+    })
+    names(predictions) = colnames(query.expr)
+    return(predictions)
+}
+```
+
+## Read training datasets and their metadata
+```{r cache=TRUE, warnings=FALSE}
+base.path = '/Users/kevindialdestoro/scRNASeqPredict'
+# datasets: GEO accessions for spleen (x2), ESC, thymus (x2), kidney, lung
+datasets.accessions = c('GSE75109', 'GSE75110',
+                        'E-MTAB-2805',
+                        'GSE60297', 'GSE74596',
+                        'GSE66202',
+                        'GSE66578')
+datasets.paths = paste(base.path, 'data', paste0(datasets.accessions, '.txt'), sep='/')
+metadata.path = paste(base.path, 'metadata.tsv', sep='/')
+
+exprs = ReadDatasets(datasets.paths)
+metadata = ReadMetadata(metadata.path)
+table(metadata[colnames(exprs),'celltype']) # summary of cell types across the datasets
+```
+
+## Build PCA model
+```{r cache=TRUE, warnings=FALSE}
+pca.model = BuildPCAModel(exprs)
+```
+
+## Test prediction on a dataset with spleen cells
+```{r cache=TRUE, warnings=FALSE}
+# test 1 using dataset GSE75111 of 151 spleen cells
+query.dataset.accession = 'GSE75111'
+query.dataset.path = paste(base.path, 'data', paste0(query.dataset.accession, '.txt'), sep='/')
+query.expr = read.table(query.dataset.path, sep="\t", header=TRUE, check.names=FALSE, row.names=1)
+predictions = PredictCellTypes(query.expr, pca.model, metadata)
+table(predictions) # 100% accuracy
+```
