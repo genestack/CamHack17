@@ -1,7 +1,7 @@
 CamHack17
 ================
 
-Single-cell RNA-Seq cell-type prediction
+Single-cell RNA-Seq cell type prediction
 -----------------------------------------
 R package to predict the cell types of new single-cell RNA-Seq samples based on past collection of annotated gold-standard single-cell RNA-Seq experiments:
 - Supply a collection of annotated samples. 33 public annotated gold-standard scRNA-Seq datasets are already collected by Lin et al. [Using Neural Networks To Improve Single-Cell RNA-Seq Data Analysis](https://www.biorxiv.org/content/early/2017/04/23/129759) -- this collection can be used as a starting point.
@@ -10,7 +10,7 @@ R package to predict the cell types of new single-cell RNA-Seq samples based on 
 Future direction:
 - Incorporate more advanced methods such as deep learning
 - Show prediction accuracy using e.g. MAP scores
-- Cell-type ontology-aware predictions
+- Cell type ontology-aware predictions
 
 Automatic P-value thresholding
 -----------------------------------------
