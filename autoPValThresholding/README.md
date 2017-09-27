@@ -71,7 +71,7 @@ TestFDRThresholding(number.of.signals=100, number.of.noises=10000, fdr.threshold
     ## [1] "# true positives: 100 out of 100"
     ## [1] "# false positives: 0"
 
-But what if I had gone stricter by setting `fdr.threshold = 0.01`? This time, we miss 1 true positive.
+But what if we go stricter by setting `fdr.threshold = 0.01`? This time, we miss 1 true positive.
 
 ``` r
 TestFDRThresholding(number.of.signals=100, number.of.noises=10000, fdr.threshold=0.001)

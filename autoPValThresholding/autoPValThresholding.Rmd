@@ -55,7 +55,7 @@ If we lower the threshold down to `fdr.threshold = 0.01`, we still cover all the
 TestFDRThresholding(number.of.signals=100, number.of.noises=10000, fdr.threshold=0.01)
 ```
 
-But what if I had gone stricter by setting `fdr.threshold = 0.01`? This time, we miss 1 true positive.
+But what if we go stricter by setting `fdr.threshold = 0.01`? This time, we miss 1 true positive.
 ```{r cache=FALSE, warnings=FALSE}
 TestFDRThresholding(number.of.signals=100, number.of.noises=10000, fdr.threshold=0.001)
 ```
